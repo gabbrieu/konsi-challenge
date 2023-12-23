@@ -1,10 +1,11 @@
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { routes } from '@presentation/routes';
 import { SchemaCompilersType, schemaCompilers } from '@utils/schema.util';
 import * as Fastify from 'fastify';
 
 const app = Fastify.fastify({
     logger: false,
-});
+}).withTypeProvider<TypeBoxTypeProvider>();
 
 for (const route of routes) {
     app.register(route);

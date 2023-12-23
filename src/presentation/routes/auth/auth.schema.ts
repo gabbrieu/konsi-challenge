@@ -1,18 +1,13 @@
+import { Type } from '@sinclair/typebox';
+
 export const loginSchema = {
-    body: {
-        type: 'object',
-        required: ['username', 'password'],
-        properties: {
-            username: { type: 'string' },
-            password: { type: 'string' },
-        },
-    },
+    body: Type.Object({
+        username: Type.String(),
+        password: Type.String(),
+    }),
     response: {
-        200: {
-            type: 'object',
-            properties: {
-                token: { type: 'string' },
-            },
-        },
+        200: Type.Object({
+            token: Type.String(),
+        }),
     },
 };
