@@ -1,5 +1,5 @@
-import { scrapingController } from '@presentation/controllers';
+import { ScrapingController } from '@presentation/controllers';
 
-export const makescrapingController = (): scrapingController => {
-    return new scrapingController();
+export const makeScrapingController = (): ScrapingController => {
+    return new ScrapingController();
 };
