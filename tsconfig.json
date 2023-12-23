@@ -8,6 +8,9 @@
         "rootDir": ".",
         "outDir": "build",
         "paths": {
+            "@application/*": ["./src/application/*"],
+            "@presentation/*": ["./src/presentation/*"],
+            "@server": ["./src/server.ts"],
             "@utils/*": ["./src/utils/*"]
         }
     }
