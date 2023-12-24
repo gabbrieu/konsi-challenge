@@ -12,7 +12,8 @@
             "@domain/*": ["./src/domain/*"],
             "@presentation/*": ["./src/presentation/*"],
             "@server": ["./src/server.ts"],
-            "@utils/*": ["./src/utils/*"]
+            "@utils/*": ["./src/utils/*"],
+            "@validations/*": ["./src/validations/*"]
         }
     }
 }

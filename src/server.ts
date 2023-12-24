@@ -11,6 +11,7 @@ for (const route of routes) {
     app.register(route);
 }
 
+// Removing the coerce type configuration from body only
 app.setValidatorCompiler(req => {
     if (!req.httpPart) {
         throw new Error('Missing httpPart');
