@@ -1,18 +1,27 @@
-import { IExternalAPIGetDocumentDataDTO } from '@domain/entities';
-import { IGetDataUseCase } from '@domain/usecases';
+import { IBenefits, IExternalAPIData } from '@domain/entities';
+import { IGetDataUseCase, ISearchDocumentUseCase } from '@domain/usecases';
 import { HttpStatusCode } from '@utils/enums';
 import { ApiError } from '@utils/errors';
-import axios from 'axios';
 
 export class GetDataUseCase implements IGetDataUseCase {
-    async execute(document: string, token: string): Promise<void> {
+    constructor(
+        private readonly searchDocumentUseCase: ISearchDocumentUseCase
+    ) {}
+
+    async execute(document: string): Promise<IBenefits[]> {
         try {
-            const axiosResponse =
-                await axios.get<IExternalAPIGetDocumentDataDTO>(
-                    process.env.BASE_URL +
-                        `/api/v1/inss/consulta-beneficios?cpf=${document}`,
-                    { headers: { Authorization: token } }
-                );
+            const result = await this.searchDocumentUseCase.execute({
+                index: 'documents',
+                query: { match: { _id: document } },
+            });
+
+            if (result.hits.total === 0) {
+                // send to rabbitmq
+            }
+            const documentData = result.hits.hits[0]
+                ._source as IExternalAPIData;
+
+            return documentData.beneficios;
         } catch (error: any) {
             throw new ApiError(
                 HttpStatusCode.INTERNAL_SERVER_ERROR,

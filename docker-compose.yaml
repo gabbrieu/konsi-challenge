@@ -11,6 +11,9 @@ services:
         restart: unless-stopped
         ports:
             - '${PORT}:${PORT}'
+        depends_on:
+            - rabbitmq
+            - elasticsearch
         volumes:
             - .:/app
 
@@ -20,3 +23,36 @@ services:
         ports:
             - '5672:5672'
             - '15672:15672'
+
+    redis:
+        image: redis
+        container_name: redis
+        restart: always
+        ports:
+            - '6379:6379'
+        volumes:
+            - cache:/data
+
+    elasticsearch:
+        image: elasticsearch:8.11.3
+        container_name: elasticsearch
+        restart: always
+        environment:
+            - http.host="0.0.0.0"
+            - transport.host="0.0.0.0"
+            - discovery.type="single-node"
+            # Colocar no .env
+            - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
+            - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
+            - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
+        volumes:
+            - elsData:/usr/share/elasticsearch/data
+        ports:
+            - '9200:9200'
+            - '9300:9300'
+
+volumes:
+    cache:
+        driver: local
+    elsData:
+        driver: local

@@ -5,9 +5,12 @@ export const getDataSchema = {
         document: Type.String(),
     }),
     response: {
-        200: Type.Object({
-            token: Type.String(),
-        }),
+        200: Type.Array(
+            Type.Object({
+                numero_beneficio: Type.String(),
+                codigo_tipo_beneficio: Type.String(),
+            })
+        ),
     },
 };
 

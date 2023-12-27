@@ -8,12 +8,8 @@ export async function scrapingRoute(fastify: AppType): Promise<void> {
     const scrapingController: ScrapingController = makeScrapingController();
 
     fastify
-        .get('/scraping', { schema: getDataSchema }, req =>
-            scrapingController.getData(
-                req.query.document,
-                req.headers.authorization
-            )
-        )
         .addHook('onRequest', ScrapingValidation.validateDocument)
-        .addHook('onRequest', ScrapingValidation.checkToken);
+        .get('/scraping', { schema: getDataSchema }, req =>
+            scrapingController.getData(req.query.document)
+        );
 }

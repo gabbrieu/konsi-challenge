@@ -21,11 +21,13 @@
         "typescript": "^5.3.3"
     },
     "dependencies": {
+        "@elastic/elasticsearch": "^8.11.0",
         "@fastify/type-provider-typebox": "^3.5.0",
         "@sinclair/typebox": "^0.32.1",
         "ajv": "^8.12.0",
         "amqplib": "^0.10.3",
         "axios": "^1.6.2",
-        "fastify": "^4.25.1"
+        "fastify": "^4.25.1",
+        "redis": "^4.6.12"
     }
 }

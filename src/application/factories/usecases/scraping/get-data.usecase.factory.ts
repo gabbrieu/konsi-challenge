@@ -1,5 +1,8 @@
+import { makeSearchDocumentUseCase } from '@application/factories';
 import { GetDataUseCase } from '@application/usecases';
 
 export const makeGetDataUseCase = (): GetDataUseCase => {
-    return new GetDataUseCase();
+    const searchDocumentUseCase = makeSearchDocumentUseCase();
+
+    return new GetDataUseCase(searchDocumentUseCase);
 };
