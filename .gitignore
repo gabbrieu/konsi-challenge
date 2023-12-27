@@ -1,3 +1,4 @@
 node_modules
 .env
 documents.txt
+container_already_started

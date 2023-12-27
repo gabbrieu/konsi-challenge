@@ -11,6 +11,9 @@ export const getDataSchema = {
                 codigo_tipo_beneficio: Type.String(),
             })
         ),
+        202: Type.Object({
+            message: Type.String(),
+        }),
     },
 };
 

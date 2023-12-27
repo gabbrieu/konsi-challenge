@@ -2,6 +2,7 @@ import { makeScrapingController } from '@application/factories';
 import { ScrapingController } from '@presentation/controllers';
 import { getDataSchema } from '@presentation/routes/scraping';
 import { AppType } from '@server';
+import { HttpStatusCode } from '@utils/enums';
 import { ScrapingValidation } from '@validations/scraping';
 
 export async function scrapingRoute(fastify: AppType): Promise<void> {
@@ -9,7 +10,18 @@ export async function scrapingRoute(fastify: AppType): Promise<void> {
 
     fastify
         .addHook('onRequest', ScrapingValidation.validateDocument)
-        .get('/scraping', { schema: getDataSchema }, req =>
-            scrapingController.getData(req.query.document)
-        );
+        .get('/scraping', { schema: getDataSchema }, async (req, res) => {
+            const response = await scrapingController.getData(
+                req.query.document
+            );
+
+            if (response === false) {
+                res.statusCode = HttpStatusCode.ACCEPTED;
+                return {
+                    message: 'Document is not indexed and it was sent to queue',
+                };
+            }
+
+            return response;
+        });
 }
