@@ -4,6 +4,8 @@ import {
     ILoginResponseDTO,
 } from '@domain/entities';
 import { ILoginUseCase } from '@domain/usecases';
+import { HttpStatusCode } from '@utils/enums';
+import { ApiError } from '@utils/errors';
 import axios from 'axios';
 
 export class LoginUseCase implements ILoginUseCase {
@@ -14,8 +16,14 @@ export class LoginUseCase implements ILoginUseCase {
             body
         );
 
-        // VERIFY SUCCESS
         const responseData: IExternalAPILoginResponseDTO = axiosResponse.data;
+
+        if (!responseData.success) {
+            throw new ApiError(
+                HttpStatusCode.UNAUTHORIZED,
+                'Error while generating token'
+            );
+        }
 
         return { token: responseData.data.token };
     }

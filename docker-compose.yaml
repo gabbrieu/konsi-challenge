@@ -41,15 +41,26 @@ services:
             - http.host="0.0.0.0"
             - transport.host="0.0.0.0"
             - discovery.type="single-node"
-            # Colocar no .env
-            - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
-            - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
+            - xpack.security.enabled=false
             - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
         volumes:
             - elsData:/usr/share/elasticsearch/data
         ports:
             - '9200:9200'
             - '9300:9300'
+
+    consumer:
+        container_name: consumer
+        build:
+            context: .
+            dockerfile: Dockerfile.consumer
+        restart: always
+        depends_on:
+            - rabbitmq
+            - elasticsearch
+            - redis
+        volumes:
+            - .:/app
 
 volumes:
     cache:

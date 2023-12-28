@@ -4,27 +4,27 @@ import { HttpStatusCode } from '@utils/enums';
 import { ApiError } from '@utils/errors';
 
 export class SendMessageToQueueUseCase implements ISendMessageToQueueUseCase {
+    constructor(private readonly rabbitMQ: RabbitMQ) {}
+
     async execute(message: any): Promise<void> {
-        let rabbitMQ: RabbitMQ | undefined;
         try {
-            rabbitMQ = new RabbitMQ();
-            await rabbitMQ.build();
-            await rabbitMQ.channel.assertQueue(rabbitMQ.queueName);
+            await this.rabbitMQ.build();
+            await this.rabbitMQ.channel.assertQueue(this.rabbitMQ.queueName);
 
-            this._sendMessageToQueue(rabbitMQ, message);
+            this._sendMessageToQueue(message);
 
-            await rabbitMQ.channel.close();
+            await this.rabbitMQ.channel.close();
         } catch (error) {
             console.error('Error when sending message to queue');
             throw error;
         } finally {
-            await rabbitMQ?.connection.close();
+            await this.rabbitMQ.connection.close();
         }
     }
 
-    private _sendMessageToQueue(rabbitMQ: RabbitMQ, message: any): void {
-        const dataSent: boolean = rabbitMQ.channel.sendToQueue(
-            rabbitMQ.queueName,
+    private _sendMessageToQueue(message: any): void {
+        const dataSent: boolean = this.rabbitMQ.channel.sendToQueue(
+            this.rabbitMQ.queueName,
             Buffer.from(message)
         );
 

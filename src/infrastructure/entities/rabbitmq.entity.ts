@@ -18,7 +18,7 @@ export class RabbitMQ {
         this.queueName = queueName;
     }
 
-    public async build() {
+    async build(): Promise<void> {
         const rabbitmqURL: string | undefined = process.env.RABBITMQ_URL;
         if (!rabbitmqURL) {
             throw new Error('Please provide the RabbitMQ URL on .env file');

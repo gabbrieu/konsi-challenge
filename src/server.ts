@@ -34,6 +34,7 @@ const start = async (): Promise<void> => {
         process.exit(1);
     }
 };
+
 start();
 
 export type AppType = typeof app;

@@ -7,6 +7,7 @@ import {
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { HttpStatusCode } from '@utils/enums';
 import { ApiError } from '@utils/errors';
+
 export class GetDataUseCase implements IGetDataUseCase {
     constructor(
         private readonly searchDocumentUseCase: ISearchDocumentUseCase,
