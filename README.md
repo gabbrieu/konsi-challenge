@@ -1,54 +1,79 @@
 # Desafio Software Engineer - Backend - Node
 
-Olá! Esse desafio técnico tem como propósito medir suas habilidades, ver como estuda, pensa e se organiza na prática. A stack tecnológica utilizada é de sua escolha. Solicitamos que seja utilizado Node com Typescript.
+## Pré-requisitos
 
-Após finalizar o desafio, nos envie um link para repositório do projeto.
+1. Tenha o docker e o docker compose instalados na sua máquina.
 
-Existem diversas maneiras e profundidades de solucionar o problema que estamos propondo. Vamos listar algumas sub-tasks que podem guiá-lo(a) em relação a essas possibilidades.
+## Começando
 
-## O desafio
+1. Para rodar localmente, crie um arquivo .env na raiz da pasta seguindo o exemplo do arquivo `.env.example`.
+2. Crie um arquivo documents.txt na raiz da aplicação seguindo o exemplo do arquivo `documents.example.txt`, passando todos os CPFs que deseja inserir inicialmente na fila separados por uma quebra de linha cada um (coloque alguns repetidos).
 
-A Konsi coleta uma variedade de dados que não são facilmente acessíveis, para propor melhores opções de créditos para seus clientes. Um dos tipos de dados coletados é o número da matrícula e código do tipo do benefício do aposentado ou pensionista.
+## Rodando a aplicação
 
-O desafio é fazer uma API que busque e retorne a matrícula do servidor em uma determinada API externa.
+Para rodar a aplicação, execute o seguinte comando:
 
-Será necessário desenvolver uma aplicação para coletar esse dado na API externa, uma API para fazer input e buscar o resultado depois.
+```bash
+docker compose up -d
+```
 
-## A aplicação
+A primeira vez que o container da API for criado, o serviço subirá os CPFs do arquivo documents.txt para o RabbitMQ.
+Outro container chamado consumer também subirá para consumir as mensagens e as indexará no Elasticsearch, verificando se a mesma já existe no Redis.
 
-É necessário realizar geração de token com as credenciais que vamos fornecer, consultar o CPF do cliente e retornar os dados de benefícios encontrados (número do benefício e código do tipo do benefício).
+## Principais pastas
 
-- Gerar token: POST `/api/v1/token` com o seguinte `body`:   
-  ```
-  {
-    "username": string,
-    "password": string
-  }
-  ```
-- Buscar dados de benefícios: GET `/api/v1/inss/consulta-beneficios?cpf={cpf}`
+### `queue/`
 
-Obs: A URL base e credenciais serão enviadas no privado. Caso não tenha recebido, favor solicitar.
+Pasta que contém os arquivos de sender e consumer da fila.
 
-### Dado a ser coletado:
+-   O arquivo `send-initial-documents.ts` contém a lógica que sobe os CPFs iniciais do arquivo documents.txt.
+-   O arquivo `consume-document-messages.ts` contém a lógica do consumidor da fila, na qual é um container separado responsável somente por consumir as mensagems do RabbitMQ, colocar a mensagem no Redis e indexa-lá no Elasticsearch.
 
-* Lista de números das matrículas (número do benefício) com o respectivo código do tipo de benefício.
+### `public/`
 
-### Etapas obrigatórias:
+Pasta responsável por conter o arquivo estático `index.html` na qual fica a simples interface WEB para se inserir um CPF.
 
-* A lista de CPFs deve ser inicialmente colocada em uma fila do **RabbitMQ.**
-* Na fila do rabbitmq, devem existir CPFs repetidos.
-* Ao consumir da fila do **RabbitMQ** um CPF, o sistema deve verificar previamente no cache do **Redis** se existe um JSON com os dados referentes CPF.
-* Após realizar a consulta, os dados de matriculas de um CPF devem ser indexados utilizando **Elasticsearch**.
-* Construir uma interface web com um campo de busca. Ao digitar um CPF, o sistema deve verificar no **Elasticsearch** se existem informações de matrícula para o CPF desejado. 
+### `src/`
 
+Pasta principal do backend do projeto. Nela está localizada toda o sistema necessário para a construção da API e serviços da fila.
 
-## Alguns pontos que serão analisados:
+#### `src/application`
 
-* Organização do código 
-* Testes
-* Facilidade ao rodar o projeto
-* Escalabilidade: o quao fácil é escalar a aplicação.
-* Performance: aqui avaliaremos o tempo para resgatar e tratar os dados.
+Subpasta na qual estão localizadas as factories e a lógica dos casos de uso da aplicação.
 
+#### `src/domain`
 
-*Happy coding! :-)*
+Subpasta na qual ficam as interfaces de entidades e interfaces de casos de uso da aplicação.
+
+#### `src/infrastructure`
+
+Subpasta na qual ficam as lógicas de implementação das entidades da aplicação.
+
+#### `src/presentation`
+
+Subpasta na qual ficam as rotas e controllers da aplicação.
+
+#### `src/utils`
+
+Subpasta na qual ficam as funcionalidades comuns à toda aplicação.
+
+#### `src/validations`
+
+Subpasta na qual ficam as validações da aplicação.
+
+## Endpoints
+
+-   Obtém os dados de um CPF - GET `/scraping?document={cpf}`
+-   Expõem uma interface WEB para consultar o CPF (chama o endpoint de obter dados de um CPF) - GET `/get-data`
+
+O endpoint de consulta de CPF trabalha somente com CPFs reconhecidos pela API fornecida. Todavia vale ressaltar que o sistema funciona normal para CPFs não reconhecidos (manda para a fila, é consumida pela mesma e verifica seus dados na API externa), porém o mesmo não dá um feedback na interface WEB pois o processamento é feito separadamente no container do consumer e não foi feito um sistema de Websocket por exemplo para informar erro quando não há dados do CPF na API externa. A mensagem é somente enviada para a fila e consumida.
+
+Dito isto, para testar o fluxo de indexar o CPF no Elasticsearch fora do processamento inicial, é recomendado inserir um CPF válido do sistema externo e que não foi colocado no arquivo `documents.txt`.
+
+## Notas
+
+O log do container do consumer informa em tempo real quando uma mensagem é processada pelo serviço. Para sua visualização rode o comando:
+
+```bash
+docker logs -f consumer
+```
