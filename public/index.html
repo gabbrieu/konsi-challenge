@@ -8,6 +8,8 @@
     <body>
         <input type="text" name="document" id="document" />
         <button type="submit" onclick="submit()">Enviar</button>
+        <br />
+        <span id="fill"></span>
     </body>
 
     <script type="text/javascript">
@@ -17,7 +19,23 @@
 
             const xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const response = JSON.parse(xhr.response);
+                    let htmlString = '<dl>';
+
+                    for (let i = 0; i < response.length; i++) {
+                        htmlString += `<dt>${i + 1}</dt>`;
+
+                        for (const chave in response[i]) {
+                            if (response[i].hasOwnProperty(chave)) {
+                                htmlString += `<dd>${chave}: ${response[i][chave]}</dd>`;
+                            }
+                        }
+                    }
+                    htmlString += '</dl>';
+                    document.getElementById('fill').innerHTML = htmlString;
+                } else if (xhr.readyState === 4) {
+                    document.getElementById('fill').innerHTML = '';
                     alert(xhr.response);
                 }
             };
