@@ -77,3 +77,9 @@ O log do container do consumer informa em tempo real quando uma mensagem é proc
 ```bash
 docker logs -f consumer
 ```
+
+Para os logs da API rode:
+
+```bash
+docker logs -f api
+```
