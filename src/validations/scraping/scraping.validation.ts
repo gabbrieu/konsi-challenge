@@ -1,15 +1,18 @@
-import { GetDataQueryStringType } from '@presentation/routes/scraping';
+import { IncomingMessageExtended, NextFunction } from '@fastify/middie';
 import { HttpStatusCode } from '@utils/enums';
 import { ApiError } from '@utils/errors';
+import * as createServer from 'connect';
+import { IncomingMessage } from 'connect';
 import { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from 'fastify';
+import { ServerResponse } from 'node:http';
 
 export abstract class ScrapingValidation {
     static validateDocument(
-        req: FastifyRequest,
-        _: FastifyReply,
-        done: HookHandlerDoneFunction
+        req: createServer.IncomingMessage & IncomingMessageExtended,
+        _: ServerResponse<IncomingMessage>,
+        next: NextFunction
     ): void {
-        const query = req.query as GetDataQueryStringType;
+        const query = req.query;
         const document: string = query.document;
         const cpfRegex = /^(\d{3}[.]?\d{3}[.]?\d{3}-?\d{2})$/;
 
@@ -17,12 +20,9 @@ export abstract class ScrapingValidation {
             throw new ApiError(HttpStatusCode.BAD_REQUEST, 'CPF malformed');
         }
 
-        (req.query as GetDataQueryStringType).document = document.replace(
-            /(\.|-)/g,
-            ''
-        );
+        req.query.document = document.replace(/(\.|-)/g, '');
 
-        done();
+        next();
     }
 
     static checkToken(
